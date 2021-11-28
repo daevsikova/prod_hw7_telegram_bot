@@ -54,7 +54,7 @@ class HoroscopeParser:
         return self.horo_signs[sign[0]]
 
     def get_horo(self, date, horo_sign):
-        data = {"query": f"Гороскоп {horo_sign} на {date}:", "intro": 0, "filter": 1}
+        data = {"query": f"Гороскоп {horo_sign} на {date}: ", "intro": 0, "filter": 1}
         params = json.dumps(data).encode('utf8')
         req = urllib.request.Request(self.url, data=params, headers=self.headers)
         response = urllib.request.urlopen(req)
@@ -69,7 +69,7 @@ class HoroscopeParser:
             idx += 1
             if sym == '.':
                 cnt += 1
-            if cnt == 2:
+            if cnt == 3:
                 break
 
         return horo[:idx]

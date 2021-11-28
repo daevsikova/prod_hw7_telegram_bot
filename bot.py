@@ -22,11 +22,11 @@ morph_vocab = MorphVocab()
 @bot.message_handler(commands=['start'])  # Функция отвечает на команду 'start'
 def start_message(message):
     bot.send_message(message.chat.id,
-                 f"Привет!\n"
-                 f"• Я расскажу всё, что знают звезды. Могу прислать твой персональный <b>гороскоп</b> 🔮\n"
-                 f"Чтобы узнать полный список команд, напиши /help \n"
-                 f"Чтобы закончить диалог, напиши /exit\n",
-                 parse_mode='HTML')
+                    f"Привет! \n"
+                    f"Я расскажу всё, что знают звезды. Могу прислать твой персональный <b>гороскоп</b> 🔮\n"
+                    f"Чтобы узнать полный список команд, напиши /help \n"
+                    f"Чтобы закончить диалог, напиши /exit\n",
+                    parse_mode='HTML')
 
 
 @bot.message_handler(commands=['help'])  # Функция отвечает на команду 'help'
@@ -60,44 +60,39 @@ def is_bye(message):
 
 @bot.message_handler(content_types=['text'])  # Функция обрабатывает текстовые сообщения
 def get_text(message):
-    # try:
-        chat_id = message.chat.id
-        
-        if chat_id not in user_dict:
-            user_dict[chat_id] = User()
-        
-        if is_bye(message):
-            user_dict[chat_id].needs_greet = True
-            bot.send_message(chat_id, "Рада была помочь! До встречи!")
-            return
-        
-        if user_dict[chat_id].needs_greet:
-            user_dict[chat_id].needs_greet = False
-            bot.send_message(chat_id, "Привет!")
+    chat_id = message.chat.id
+    
+    if chat_id not in user_dict:
+        user_dict[chat_id] = User()
+    
+    if is_bye(message):
+        user_dict[chat_id].needs_greet = True
+        bot.send_message(chat_id, "Рада была помочь! До встречи!")
+        return
+    
+    if user_dict[chat_id].needs_greet:
+        user_dict[chat_id].needs_greet = False
+        bot.send_message(chat_id, "Привет!")
 
-        # query classification
-        horoscope_cnt = 0
-        doc = Doc(message.text)
-        doc.segment(segmenter)
-        doc.tag_morph(morph_tagger)
-        for token in doc.tokens:
-            token.lemmatize(morph_vocab)
-            if token.lemma in horoscope_parser.keywords:
-                horoscope_cnt += 1
-            
-        if horoscope_cnt == 0:
-            bot.reply_to(message, 'Я не поняла, чего вы от меня хотите((((\n'
-                                  'Спросите, пожалуйста, еще раз как-нибудь по-другому')
-            return
+    # query classification
+    horoscope_cnt = 0
+    doc = Doc(message.text)
+    doc.segment(segmenter)
+    doc.tag_morph(morph_tagger)
+    for token in doc.tokens:
+        token.lemmatize(morph_vocab)
+        if token.lemma in horoscope_parser.keywords:
+            horoscope_cnt += 1
         
-        else:
-            bot.reply_to(message, 'Вот о чем мне рассказали звезды:')
-            process_horoscope_step(message)
-            return
+    if horoscope_cnt == 0:
+        bot.reply_to(message, 'Я не поняла, чего вы от меня хотите((((\n'
+                                'Спросите, пожалуйста, еще раз как-нибудь по-другому')
+        return
+    
+    else:
+        process_horoscope_step(message)
+        return
         
-    # except Exception as e:
-    #     bot.reply_to(message, 'Что-то пошло не так...')
-
 
 def process_horoscope_step(message):
     horo_date = horoscope_parser.process_date(message.text, ner_model)
